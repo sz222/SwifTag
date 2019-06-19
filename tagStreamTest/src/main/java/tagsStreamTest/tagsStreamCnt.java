@@ -1,6 +1,6 @@
 package tagsStreamTest;
 /*
-This application file processes example question streamings and do aggregation on tags and interacts with Redis
+This application file processes example question streamings and interacts with Redis and get count number of tags
  */
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.*;
@@ -23,9 +23,15 @@ public class tagsStreamCnt {
         final StreamsBuilder builder = new StreamsBuilder();
         Jedis jedis = new Jedis("localhost", 6397);
         jedis.connect();
+        //build source with String type key and String type value, key: keyword and value: tag
+        KStream<String, String> source = builder.stream("streams-plaintext-input");
 
-        builder.<String, String>stream("streams-plaintext-input").to("streams-pipe-output");
-
+        source.mapValues(value -> {
+            System.out.println(value);
+            String tag = value;
+            String count = jedis.get(tag);
+            return tag + ":" + count;
+        }).to("streams-tagcount-output-1");
 
         final Topology topology = builder.build();
         final KafkaStreams streams = new KafkaStreams(topology, props);
@@ -48,4 +54,5 @@ public class tagsStreamCnt {
         }
             System.exit(0);
         }
+
 }
