@@ -1,0 +1,67 @@
+<project>
+    <groupId>edu.berkeley</groupId>
+    <artifactId>auto-tagging</artifactId>
+    <modelVersion>4.0.0</modelVersion>
+    <name>Auto Tagging</name>
+    <packaging>jar</packaging>
+    <version>1.0</version>
+    <dependencies>
+        <!--<dependency> &lt;!&ndash; Spark dependency &ndash;&gt;-->
+            <!--<groupId>org.apache.spark</groupId>-->
+            <!--<artifactId>spark-core_2.12</artifactId> &lt;!&ndash; spark-sql_2.12 &ndash;&gt;-->
+            <!--<version>2.4.3</version>-->
+            <!--<scope>provided</scope>-->
+        <!--</dependency>-->
+        <dependency> <!-- Spark SQL dependency -->
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-sql_2.12</artifactId> <!-- spark-sql_2.12 -->
+            <version>2.4.3</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency> <!-- Spark XML dependency -->
+            <groupId>com.databricks</groupId>
+            <artifactId>spark-xml_2.11</artifactId> <!-- spark-sql_2.12 -->
+            <version>0.5.0</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency> <!-- Redis dependency -->
+            <groupId>com.redislabs</groupId>
+            <artifactId>spark-redis</artifactId>
+            <version>2.4.0</version>
+        </dependency>
+        <!--<dependency> &lt;!&ndash; Hadoop dependency &ndash;&gt;-->
+            <!--<groupId>org.apache.hadoop</groupId>-->
+            <!--<artifactId>hadoop-client</artifactId>-->
+            <!--<version>2.7</version>-->
+        <!--</dependency>-->
+    </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.3</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+            <!--<plugin>-->
+                <!--<artifactId>maven-assembly-plugin</artifactId>-->
+                <!--<executions>-->
+                    <!--<execution>-->
+                        <!--<phase>package</phase>-->
+                        <!--<goals>-->
+                            <!--<goal>single</goal>-->
+                        <!--</goals>-->
+                    <!--</execution>-->
+                <!--</executions>-->
+                <!--<configuration>-->
+                    <!--<descriptorRefs>-->
+                        <!--<descriptorRef>jar-with-dependencies</descriptorRef>-->
+                    <!--</descriptorRefs>-->
+                <!--</configuration>-->
+            <!--</plugin>-->
+        </plugins>
+    </build>
+</project>
