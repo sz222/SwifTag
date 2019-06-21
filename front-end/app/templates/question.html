@@ -12,12 +12,13 @@ function getquestion(){
         <title>QWERTYprints</title>
     </head>
     <body>
-        <h1 id="directions">Please enter your question and choose recommended or write your own tag and press submit button to begin.</h1>
-        <p>Please enter your question below:</p>
-        <form id="userform" onsubmit="return false;">
-            <input type="number" id="userInput" />
-            <input type="submit" onclick="getquestion();" />
+        <h2 id="directions">Enter question and clicknext button</h1>
+        <p>Please enter your question title below:</p>
+        <form id="questionform" onsubmit="return false;">
+            <input id="questionTitle" />
+            <p>Please enter your question body below:</p>
+            <textarea id="questionBody" ></textarea>
+            <input type="submit" onclick="getQuestionBody();" value="Next"/>
         </form>
-        
     </body>
 </html>
