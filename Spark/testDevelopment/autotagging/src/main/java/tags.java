@@ -13,7 +13,7 @@ public class tags {
     public static void main(String[] args) {
         //ingest sample data of 2000 records from S3
 //         String inputPath = "s3a://insightdeshuyan/tags/questions_sample_2k.csv";
-        String inputPath = "s3a://insightdeshuyan/questiondata/all-000000000005.csv";
+        String inputPath = "s3a://insightdeshuyan/questiondata/all-0000000000**.csv";
 
         //start a new spark session
         SparkSession spark = SparkSession.builder()
@@ -57,13 +57,10 @@ public class tags {
 
         Dataset<Row> tagsList = tagsTuple.groupBy("keyWordLower").agg(collect_list("tagTuple")); //tagsTuple.col(
 
-
-
-//        Dataset<Row> countsOrd = counts.orderBy(counts.col("count").desc());
-//        //write (key, value) pair into redis table called 'tag'
+//        //write (key, value) pair into redis table called 'questionTag'
         tagsList.write()
                 .format("org.apache.spark.sql.redis")
-                .option("table", "test")
+                .option("table", "questionTag")
                 .option("key.column", "keyWordLower")
                 .option("value.column", "tagList")
                 .mode(SaveMode.Overwrite)
