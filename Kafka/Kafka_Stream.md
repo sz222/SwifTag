@@ -53,3 +53,13 @@ In addition, here's the [tutorial](https://kafka.apache.org/22/documentation/str
     --property key.deserializer=org.apache.kafka.common.serialization.StringDeserializer \
     --property value.deserializer=org.apache.kafka.common.serialization.LongDeserializer
 ```
+***Appendix: Confluent related commands***
+Under Confluent folder:
+* List available topic:
+```
+    ./bin/kafka-topics --zookeeper localhost:2181 --list
+```
+* Remove a topic
+```
+    ./bin/kafka-topics --zookeeper localhost:2181 --delete --topic streams-tagcount-output-1
+```
