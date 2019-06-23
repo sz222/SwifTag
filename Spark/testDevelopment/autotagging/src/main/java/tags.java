@@ -7,18 +7,21 @@ import java.lang.String;
 import static org.apache.spark.sql.functions.*;
 
 public class tags {
-    public static String[] stopWords = { "and", "an", "i", "not", "is", "are", "?", ".", "who", "in", "to", "how", "a", "the" };
+    public static String[] stopWords = { "and", "an", "i", "not", "is", "are", "?",
+                                        ".", "who", "in", "to", "how", "a", "the", "using" };
 
     public static void main(String[] args) {
         //ingest sample data of 2000 records from S3
 //         String inputPath = "s3a://insightdeshuyan/tags/questions_sample_2k.csv";
-        String inputPath = "s3a://insightdeshuyan/questiondata/all-00000000000*.csv";
+        String inputPath = "s3a://insightdeshuyan/questiondata/all-000000000005.csv";
+
         //start a new spark session
         SparkSession spark = SparkSession.builder()
                 .appName("Tag Count")
                 .config("spark.redis.host", "10.0.0.12")
                 .config("spark.redis.port", "6379")
                 .getOrCreate();
+
         //config to read int csv file
         Dataset<Row> data = spark.read()
                 .option("multiLine", true)
@@ -26,16 +29,18 @@ public class tags {
                 .option("escape", "\"")
                 .csv(inputPath);
 
+        //flatten map tags column
         Dataset<Row> tags = data.withColumn(
                 "tag", explode(split(data.col("tags"), "\\|")).as("tag"));
-
         tags.createOrReplaceTempView("tags");
+
         //select field: id, title, tag from data:tags
         Dataset<Row> prepData = spark.sql("SELECT id, title, tag, tags FROM tags");
-        //split and extract key words from question "title" field
 
+        //split and extract key words from question "title" field
         Dataset<Row> keyWords = prepData.withColumn(
                 "keyWord", explode(split(prepData.col("title"), " ")).as("keyWord"));
+
         //remove some major meaningless key words from the data
         Dataset<Row> keyWordsCleaned = keyWords.withColumn(
                 "keyWordLower", lower(keyWords.col("keyWord")).as("keyWordLower"));
@@ -43,18 +48,28 @@ public class tags {
             not(keyWordsCleaned.col("keyWordLower").isin(stopWords))
         );
 
+        //count number of records group by tag and keyWordLower fileds together
+        Dataset<Row> tagsCount = keyWordsCleaned.groupBy("tag", "keyWordLower").count();
 
-        Dataset<Row> counts = keyWordsCleaned.groupBy("tag", "keyWordLower").count(); //, "keyWordLower"
-        Dataset<Row> countsOrd = counts.orderBy(counts.col("count").desc());
+        //for each keyWord, construct an array of tuples of (tag, count) inside
+        Dataset<Row> tagsTuple = tagsCount.withColumn("tagTuple",
+                struct(tagsCount.col("tag"), tagsCount.col("count")).as("tagTuple"));//.show(false)
+
+        Dataset<Row> tagsList = tagsTuple.groupBy("keyWordLower").agg(collect_list("tagTuple")); //tagsTuple.col(
+
+
+
+//        Dataset<Row> countsOrd = counts.orderBy(counts.col("count").desc());
 //        //write (key, value) pair into redis table called 'tag'
-        countsOrd.write()
+        tagsList.write()
                 .format("org.apache.spark.sql.redis")
-                .option("table", "tag")
-                .option("key.column", "tag")
+                .option("table", "test")
+                .option("key.column", "keyWordLower")
+                .option("value.column", "tagList")
                 .mode(SaveMode.Overwrite)
                 .save();
-        countsOrd.show(30);
-        keyWordsCleaned.schema();
+        tagsList.show(30);
+        tagsList.schema();
         spark.stop();
     }
 }
