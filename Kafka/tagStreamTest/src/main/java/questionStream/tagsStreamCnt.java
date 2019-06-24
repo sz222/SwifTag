@@ -10,7 +10,7 @@ import redis.clients.jedis.Jedis;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 
 public class tagsStreamCnt {
@@ -28,14 +28,20 @@ public class tagsStreamCnt {
         //build source with String type key and String type value, key: keyword and value: tag
         KStream<String, String> source = builder.stream("streams-questions-input");
 
+        //for each question title in the incoming streaming data, extract keywords, look up its tags count in redis
+        //and come up with top 3 tags recommendation
         source.mapValues(value -> {
             Gson gson = new GsonBuilder().create();
             Question question = gson.fromJson(value, Question.class);
-            System.out.println(question.getTitle());
-            question.setTags(question.getTitle().split(" "));
-            System.out.println(gson.toJson(question));
+//            System.out.println(question.getTitle());
+//            String[] tags = getTagsRecommended(question.getTitle(), jedis);
+            getTagsRecommended(question.getTitle(), jedis);
+//            question.setTags(tags);
+//            question.setTags(question.getTitle().split(" "));
+//            System.out.println(gson.toJson(question));
             return gson.toJson(question);
-        }).to("streams-keywords-output");
+
+        }).to("streams-tags-output");
 
         final Topology topology = builder.build();
         final KafkaStreams streams = new KafkaStreams(topology, props);
@@ -57,6 +63,35 @@ public class tagsStreamCnt {
             System.exit(1);
         }
             System.exit(0);
-        }
+    }
 
+    public static void getTagsRecommended(String title, Jedis jedis) {
+//        if (!stopWords.contains(word))
+//        String[] tagsList = new String[3];
+
+        //Schema of Values in Redis table:
+        //HGETALL questionTag:partsums
+        //1) "collect_list(tagTuple)"
+        //2) "WrappedArray([scheme,1], [stream,1])"
+        Map<String, Integer> tagMap = new HashMap<>(); //create a map with key:tag name value: tag count
+        
+        String[] keyWords = title.split(" ");
+        for (String word : keyWords) {
+            if (!stopWords.contains(word.toLowerCase())) {
+                if (jedis.hgetAll("questionTag:" + word.toLowerCase()) != null) {
+                    for(String key : jedis.hgetAll("questionTag:" + word.toLowerCase()).keySet()) {
+                        System.out.println("*****" + key);
+                    };
+                    //iterate through the value(array of [tag, count] tuple of keyword in Redis
+//                    String[] tagsCount = jedis.hgetAll("questionTag:" + word.toLowerCase());
+//
+                }
+            }
+        }
+//        return tagsList;
+    }
+
+    public static Set<String> stopWords = new HashSet<String>(Arrays.asList(
+            "and", "an", "i", "not", "is", "are", "?",
+            ".", "who", "in", "to", "how", "a", "the", "using" ));
 }
