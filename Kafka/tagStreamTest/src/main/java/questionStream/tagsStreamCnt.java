@@ -33,9 +33,9 @@ public class tagsStreamCnt {
         //and come up with top 3 tags recommendation
         source.mapValues(value -> {
             Gson gson = new GsonBuilder().create();
-            Question question = gson.fromJson(value, Question.class);
-            Set<String> tags = getTagsRecommended(question.getTitle(), jedis);
-            question.setTags(tags.toArray(new String[0]));
+            Question question = gson.fromJson(value, Question.class); //construct question class based on received json file message
+            Set<String> tags = getTagsRecommended(question.getTitle(), jedis); //return top 3 recommended tags based on input question title
+            question.setTags(tags.toArray(new String[0])); //set tag field for each question class object
             return gson.toJson(question);
 
         }).to("streams-tags-output");
@@ -63,10 +63,7 @@ public class tagsStreamCnt {
     }
 
     public static Set<String> getTagsRecommended(String title, Jedis jedis) {
-//        if (!stopWords.contains(word))
-//        String[] tagsList = new String[3];
-
-        //Schema of Values in Redis table:
+        //Schema of Values stored in Redis table, table name: questionTag:
         //HGETALL questionTag:partsums
         //1) "collect_list(tagTuple)"
         //2) "WrappedArray([scheme,1], [stream,1])"

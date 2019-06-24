@@ -11,8 +11,7 @@ public class tags {
                                         ".", "who", "in", "to", "how", "a", "the", "using" };
 
     public static void main(String[] args) {
-        //ingest sample data of 2000 records from S3
-//         String inputPath = "s3a://insightdeshuyan/tags/questions_sample_2k.csv";
+        //ingest all the data files in s3
         String inputPath = "s3a://insightdeshuyan/questiondata/all-0000000000**.csv";
 
         //start a new spark session
