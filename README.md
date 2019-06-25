@@ -15,6 +15,7 @@ This project provide real-time auto tagging suggestions for users that post ques
  In this project, we can provide real-time __top 3 tags__ recommendation after end users type in question title. We also provide end users options to delete or add tags based on their preference. In this way, data scientists can get better quality question data and use it perform clustering, user behavior investigation and recommendation model evaluation better.
  
  ### Demo:
+![Auto Tagging System](https://github.com/watermelonsz/AutoTagging/blob/master/Presentation/autoTagging.gif)
  
  ### Data:
  __Source:__ BigQuery Open Datasets\
