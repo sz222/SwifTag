@@ -98,7 +98,7 @@
 
               <div class="mb-8">
                 <label for="tags"><strong>Tags</strong> <span class="text-muted">(Optional)</span></label>
-                <input type="text" class="form-control" data-role="tagsinput" id="tags">
+                <input type="text" class="form-control" data-role="tagsinput" id="tags"> <!--data-role: parameter from tagsinput plugin-->
               </div>
 
               <hr class="mb-8">
@@ -712,16 +712,18 @@
       var socket = io("http://ec2-54-212-100-123.us-west-2.compute.amazonaws.com:5000");
       socket.on('connect', function() {
       });
-      // Receive socket.io session id.
+      // Receive socket.io session id from server's message
       socket.on('sid', function(data) {
         sid = data;
       });
+      //message taype: tags, get from kconsumer in thread
       socket.on('tags', function(data) {
         const tags = data.tags;
         for (i in tags) {
-          $("#tags").tagsinput('add', tags[i]);
+          $("#tags").tagsinput('add', tags[i]); //select "tags"input box and add tag value in it
         }
       })
+      //get title and content and send them to web server
       function getTags(title, content) {
         // use socket to emit message to server
         socket.emit('question', {
@@ -730,11 +732,11 @@
           content,
         })
       }
-      $('#content').focusout(function() {
+      $('#content').focusout(function() { //after finish typing question content
         $("#tags").tagsinput('removeAll');
         var title = $('#title').val();
         var content = $('#content').val();
-        getTags(title, content);
+        getTags(title, content); //send out contents after focusout
       });
     </script>
   </body>
