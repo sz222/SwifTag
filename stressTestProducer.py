@@ -16,8 +16,8 @@ import pandas as pd
 # import numpy as np
 # import pickle
 kafka_bs = ['10.0.0.8:9092','10.0.0.7:9092','10.0.0.11:9092'] #
-k_in_topic = 'streams-questionStreamTest-input'
-k_out_topic = 'streams-tagStreamTest-output'
+k_in_topic = 'streams-questions-input'
+k_out_topic = 'streams-tags-output'
 
 
 k_producer = KafkaProducer(bootstrap_servers=kafka_bs)
@@ -33,16 +33,16 @@ data = pd.read_csv("s3://insightdeshuyan/tags/questions_sample_2k.csv")
 #    print row['c1'], row['c2']
 df = pd.DataFrame(data)
 df = df[['id', 'title','body']]
-df = df[:1]
+# df = df[:100]
 df.columns = ['id', 'title', 'content']
 length = df.shape[0] #get number of rows
 print("original dat size is : ******" + str(length))
 # print('received message: ' + str(message) + ' from ' + str(request.sid), file=sys.stderr)
 
 k_consumer = KafkaConsumer(
-    k_in_topic,
-    bootstrap_servers=kafka_bs
-    # value_deserializer=lambda x: json.loads(x)
+    k_out_topic,
+    bootstrap_servers=kafka_bs,
+    value_deserializer=lambda x: json.loads(x)
 )
 
 def background():
@@ -50,11 +50,14 @@ def background():
     cnt = 0   
     for msg in k_consumer:
         cnt += 1
-        print('receive consumer message: ' + str(msg.value))
+        if cnt % 10 == 0:
+            print("Received " + str(cnt) + " message")
         if cnt == length:
             print("totle number of message recived is: " + str(cnt))
-        # with app.test_request_context('/'):
-        #     socketio.emit('tags', msg.value, room=msg.value.get("sid"))
+            end_time = time.time()
+            seconds_elapsed = end_time - start_time
+            print(seconds_elapsed)
+            print(seconds_elapsed / length)
      
 if consumer_thread is None:
     consumer_thread = Thread(target=background)
@@ -62,16 +65,10 @@ if consumer_thread is None:
     consumer_thread.start()
     time.sleep(3)
 
+start_time = time.time()
 for record in df.to_dict(orient='records'): #df.iterrows()
+    print('new record')
     k_producer.send(k_in_topic, json.dumps(record))
-    print(record)
 
 k_producer.flush()
-time.sleep(3)
-
-# print("totle data size is: " + str(length))
-
-# if __name__ == "__main__":
-#     # socketio.run(app)
-#     # app.run(host="0.0.0.0", debug=True)
-
+raw_input('Press Enter to exit')
