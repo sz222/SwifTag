@@ -10,6 +10,8 @@ public class Question {
         private String content;
         @SerializedName("tags")
         private String[] tags;
+        @SerializedName("timestamp")
+        private String timestamp;
 
         public void setTags(String[] tags) {
             this.tags = tags;
@@ -29,5 +31,9 @@ public class Question {
 
         public String getSid() {
             return this.sid;
+        }
+
+        public String getTimeStamp() {
+            return this.timestamp;
         }
 }

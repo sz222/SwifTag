@@ -1,0 +1,5 @@
+#!/bin/bash
+
+python kafka_producer_sessions.py 1 &
+python kafka_producer_sessions.py 2 &
+python kafka_producer_sessions.py 3 &

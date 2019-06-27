@@ -12,6 +12,7 @@ from threading import Thread
 # import smart_open
 # import boto
 import pandas as pd
+from s3fs import S3FileSystem
 # from utils import np_to_json
 # import numpy as np
 # import pickle
@@ -25,19 +26,11 @@ consumer_thread = None
 
 # data = pd.read_csv("s3://insightdeshuyan/streamData/all-000000000041.csv")
 data = pd.read_csv("s3://insightdeshuyan/tags/questions_sample_2k.csv")
-# print(data.head(5))
-# consumer_thread = None
-# start_time = time.time()
-# print start_time
-# for row in data.rows:
-#    print row['c1'], row['c2']
 df = pd.DataFrame(data)
 df = df[['id', 'title','body']]
-# df = df[:100]
 df.columns = ['id', 'title', 'content']
 length = df.shape[0] #get number of rows
 print("original dat size is : ******" + str(length))
-# print('received message: ' + str(message) + ' from ' + str(request.sid), file=sys.stderr)
 
 k_consumer = KafkaConsumer(
     k_out_topic,
@@ -52,12 +45,13 @@ def background():
         cnt += 1
         if cnt % 10 == 0:
             print("Received " + str(cnt) + " message")
-        if cnt == length:
+        if cnt % 1000 == 0 && cnt < 10000:
             print("totle number of message recived is: " + str(cnt))
-            end_time = time.time()
-            seconds_elapsed = end_time - start_time
-            print(seconds_elapsed)
-            print(seconds_elapsed / length)
+            consumer_end_time = time.time()
+            consumer_seconds_elapsed = consumer_end_time - start_time
+            print(consumer_seconds_elapsed)
+            print("time to deal with each message:")
+            print(consumer_seconds_elapsed / length)
      
 if consumer_thread is None:
     consumer_thread = Thread(target=background)
@@ -65,10 +59,17 @@ if consumer_thread is None:
     consumer_thread.start()
     time.sleep(3)
 
-start_time = time.time()
+producer_start_time = time.time()
 for record in df.to_dict(orient='records'): #df.iterrows()
     print('new record')
     k_producer.send(k_in_topic, json.dumps(record))
+producer_end_time = time.time()
+producer_seconds_elapsed = producer_end_time - producer_start_time
+print("time for produce: ")
+print(producer_seconds_elapsed)
+print("number of message per second:")
+print(length / producer_seconds_elapsed)
+
 
 k_producer.flush()
 raw_input('Press Enter to exit')

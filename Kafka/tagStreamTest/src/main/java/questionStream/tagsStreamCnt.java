@@ -27,13 +27,15 @@ public class tagsStreamCnt {
         Jedis jedis = new Jedis("10.0.0.12", 6379);
         jedis.connect();
         //build source with String type key and String type value, key: keyword and value: tag
-        KStream<String, String> source = builder.stream("streams-questions-input");
+            KStream<String, String> source = builder.stream("streams-questions-input");
 
+//        System.out.println("start processing");
         //for each question title in the incoming streaming data, extract keywords, look up its tags count in redis
         //and come up with top 3 tags recommendation
         source.mapValues(value -> {
+//            System.err.println("hello world");
             Gson gson = new GsonBuilder().create();
-            Question question = gson.fromJson(value, Question.class); //construct question class based on received json file message
+            Question question = gson.fromJson(value, Question.class); //construct question class based on received json file messagex
             Set<String> tags = getTagsRecommended(question.getTitle(), jedis); //return top 3 recommended tags based on input question title
             question.setTags(tags.toArray(new String[0])); //set tag field for each question class object
             return gson.toJson(question);
