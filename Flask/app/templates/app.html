@@ -74,8 +74,8 @@
     <div class="container">
     <div class="py-5 text-center">
         <img class="d-block mx-auto mb-4" src="https://cdn.sstatic.net/Sites/stackoverflow/company/img/logos/so/so-logo.png" alt="" height="72">
-        <h2>Question Auto Tagging</h2>
-        <p class="lead">(Please update the description of the project in here)</p>
+        <h2>SwifTag</h2>
+        <p class="lead">(A real-time auto tagging system for Stack Overflow questions)</p>
       </div>
       <div class="row justify-content-md-center">
           <div class="col-6">
@@ -709,7 +709,7 @@
     <script type="text/javascript" charset="utf-8">
       var sid = "";
       /* Auto tagging code in here */
-      var socket = io("http://ec2-54-212-100-123.us-west-2.compute.amazonaws.com:5000");
+      var socket = io("http://ec2-54-212-100-123.us-west-2.compute.amazonaws.com:5000"); //edit port
       socket.on('connect', function() {
       });
       // Receive socket.io session id from server's message
