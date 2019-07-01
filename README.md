@@ -24,6 +24,6 @@ This project provide real-time auto tagging suggestions for users that post ques
  
 ### Tech Stack:
 
-![tech stack image](https://raw.githubusercontent.com/watermelonsz/AutoTagging/test/Presentation/tech_stack.png)
+![tech stack image](https://raw.githubusercontent.com/watermelonsz/SwifTag/master/Presentation/swifTag.png)
 
   
