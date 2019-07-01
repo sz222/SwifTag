@@ -6,7 +6,7 @@ Insight Data Engineering Fellowship Program Project.
 This project provide real-time auto tagging suggestions for users that post questions on StackOverflow according to the question title.
 
 ### Demo:
-![Auto Tagging System](https://raw.githubusercontent.com/watermelonsz/SwifTag/master/Presentation/new_demo.gif)
+![Auto Tagging System](https://raw.githubusercontent.com/watermelonsz/SwifTag/master/Presentation/swifTag.gif)
 
 
 ### Project Idea:
