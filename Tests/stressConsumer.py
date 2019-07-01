@@ -2,6 +2,7 @@
 from __future__ import print_function
 # import struct
 import json
+import yaml
 import re
 import sys
 import time
@@ -26,7 +27,7 @@ consumer_thread = None
 k_consumer = KafkaConsumer(
     k_out_topic,
     bootstrap_servers=kafka_bs,
-    value_deserializer=lambda x: json.loads(x)
+    value_deserializer=lambda x: yaml.safe_load(x)
 )
 
 def background():
@@ -36,16 +37,23 @@ def background():
     for msg in k_consumer:
         cnt += 1
         consumer_end_time = time.time() #message recived time
+        # print("processing ending time" + (str)consumer_end_time)
+        # msg_send_time = msg.value.get('timestamp')
+        # print(msg_send_time)
         msg_send_time = float(msg.value.get('timestamp')) #message send time 
+        # print(type(msg_send_time))
+        # print("new message")
         consumer_seconds_elapsed = consumer_end_time - msg_send_time
+        print(consumer_seconds_elapsed)
         time_sum = time_sum + consumer_seconds_elapsed
-        if cnt % 100 == 0 & cnt < 10000:
-            print(msg_send_time)
-            print(consumer_end_time)
-            print(consumer_seconds_elapsed)
-            print("totle number of message recived is: " + str(cnt))
-            print("time to deal with each message:")
-            print(time_sum / cnt)
+        # if cnt % 100 == 0 & cnt < 10000:
+        #     print(msg_send_time)
+        #     print(consumer_end_time)
+        #     print(consumer_seconds_elapsed)
+        #     print("totle number of message recived is: " + str(cnt))
+        #     print("time to deal with each message:")
+        #     print(time_sum / cnt)
+        # print(time_sum / cnt)    
      
 # raw_input('Press Enter to exit')
 if __name__ == '__main__':

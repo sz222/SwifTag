@@ -10,6 +10,8 @@ import org.apache.kafka.streams.kstream.KStream;
 import redis.clients.jedis.Jedis;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPoolConfig;
 
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
@@ -18,27 +20,38 @@ public class tagsStreamCnt {
 
     public static void main(String[] args) throws Exception {
         Properties props = new Properties();
-            props.put(StreamsConfig.APPLICATION_ID_CONFIG, "streams-pipe");
-            props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "10.0.0.8:9092");
-            props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());
-            props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass());
+        props.put(StreamsConfig.APPLICATION_ID_CONFIG, "streams-pipe");
+        props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "10.0.0.8:9092,10.0.0.7:9092,10.0.0.11:9092");
+        props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());
+        props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass());
+        props.put(StreamsConfig.NUM_STREAM_THREADS_CONFIG, 16);
 
         final StreamsBuilder builder = new StreamsBuilder();
-        Jedis jedis = new Jedis("10.0.0.12", 6379);
-        jedis.connect();
-        //build source with String type key and String type value, key: keyword and value: tag
-            KStream<String, String> source = builder.stream("streams-questions-input");
+        JedisPoolConfig poolConfig = new JedisPoolConfig();
+        poolConfig.setMaxTotal(64);
+        JedisPool jedisPool = new JedisPool(poolConfig, "10.0.0.12", 6379);
 
-//        System.out.println("start processing");
+
+        //build source with String type key and String type value, key: keyword and value: tag
+        KStream<String, String> source = builder.stream("streams-questions-input");
+
         //for each question title in the incoming streaming data, extract keywords, look up its tags count in redis
         //and come up with top 3 tags recommendation
         source.mapValues(value -> {
-//            System.err.println("hello world");
-            Gson gson = new GsonBuilder().create();
-            Question question = gson.fromJson(value, Question.class); //construct question class based on received json file messagex
-            Set<String> tags = getTagsRecommended(question.getTitle(), jedis); //return top 3 recommended tags based on input question title
-            question.setTags(tags.toArray(new String[0])); //set tag field for each question class object
-            return gson.toJson(question);
+            Jedis jedis = null;
+            try {
+                jedis = jedisPool.getResource();
+                Gson gson = new GsonBuilder().create();
+                Question question = gson.fromJson(value, Question.class); //construct question class based on received json file messagex
+                Set<String> tags = getTagsRecommended(question.getTitle(), jedis); //return top 3 recommended tags based on input question title
+                question.setTags(tags.toArray(new String[0])); //set tag field for each question class object
+                return value;
+            } finally {
+                if (jedis != null) {
+                    jedis.close();
+                }
+            }
+
 
         }).to("streams-tags-output");
 
@@ -61,7 +74,7 @@ public class tagsStreamCnt {
         } catch (Throwable e) {
             System.exit(1);
         }
-            System.exit(0);
+        System.exit(0);
     }
 
     public static Set<String> getTagsRecommended(String title, Jedis jedis) {
@@ -74,9 +87,10 @@ public class tagsStreamCnt {
         String[] keyWords = title.split(" ");
         for (String word : keyWords) {
             if (!stopWords.contains(word.toLowerCase())) {
-                if (jedis.hgetAll("questionTag:" + word.toLowerCase()) != null) {
-                    for(String key : jedis.hgetAll("questionTag:" + word.toLowerCase()).keySet()) {
-                        String tagsCnt = jedis.hgetAll("questionTag:" + word.toLowerCase()).get(key);
+                Map<String, String> res = jedis.hgetAll("questionTag:" + word.toLowerCase());
+                if (res != null) {
+                    for(String key : res.keySet()) {
+                        String tagsCnt = res.get(key);
 
                         //example:*****WrappedArray([scheme,1], [stream,1])
                         //manipulate string result to get a list of array[tag, cnt]
