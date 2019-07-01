@@ -1,7 +1,7 @@
-# Real-Time Auto Tagging System 
+#  SwifTag          --- A real-time auto tagging system #
+
 
 **_-- Author: Shuyan(Stephanie) Zhou_**
-
 Insight Data Engineering Fellowship Program Project.
 This project provide real-time auto tagging suggestions for users that post questions on StackOverflow according to the question title.
 
