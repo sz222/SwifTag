@@ -45,7 +45,7 @@ public class tagsStreamCnt {
                 Question question = gson.fromJson(value, Question.class); //construct question class based on received json file messagex
                 Set<String> tags = getTagsRecommended(question.getTitle(), jedis); //return top 3 recommended tags based on input question title
                 question.setTags(tags.toArray(new String[0])); //set tag field for each question class object
-                return value;
+                return gson.toJson(question);
             } finally {
                 if (jedis != null) {
                     jedis.close();
