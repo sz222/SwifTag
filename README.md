@@ -19,9 +19,6 @@ This project provides a real-time auto tagging pipeline for users that post ques
 ### Presentation Video:
 [SwifTag Presentation Video](https://www.youtube.com/watch?v=jHk11314wW0&feature=youtu.be)
 
-### Demo:
-![Auto Tagging System](https://raw.githubusercontent.com/watermelonsz/SwifTag/master/Presentation/swifTag.gif)
-
 
 ### Project Idea:
   High quality data is essential in data mining and product analytics work, for questions related data, if "tag" information could be appended appropriately. Data scientists can perform user identification & behavior pattern recognization better. 
