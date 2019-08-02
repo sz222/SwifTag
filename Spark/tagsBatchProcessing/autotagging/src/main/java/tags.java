@@ -56,7 +56,7 @@ public class tags {
 
         Dataset<Row> tagsList = tagsTuple.groupBy("keyWordLower").agg(collect_list("tagTuple")); //tagsTuple.col(
 
-//        //write (key, value) pair into redis table called 'questionTag'
+        //write (key, value) pair into redis table called 'questionTag'
         tagsList.write()
                 .format("org.apache.spark.sql.redis")
                 .option("table", "questionTag")

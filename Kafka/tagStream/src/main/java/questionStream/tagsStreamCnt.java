@@ -19,6 +19,7 @@ import java.util.concurrent.CountDownLatch;
 public class tagsStreamCnt {
 
     public static void main(String[] args) throws Exception {
+        //configuration
         Properties props = new Properties();
         props.put(StreamsConfig.APPLICATION_ID_CONFIG, "streams-pipe");
         props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "10.0.0.8:9092,10.0.0.7:9092,10.0.0.11:9092");
